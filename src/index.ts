@@ -1,16 +1,20 @@
 class RawMediaRecorder {
-  ctx: AudioContext
-  stream: MediaStream
-  bufferSize: number
-  source: MediaStreamAudioSourceNode
-  buffers: Float32Array[]
-  script?: ScriptProcessorNode
+  readonly ctx: AudioContext
+  readonly stream: MediaStream
+  readonly bufferSize: number
+  private source: MediaStreamAudioSourceNode
+  private buffers: Float32Array[]
+  private script?: ScriptProcessorNode
 
   onstart: () => void
   onstop: () => void
   ondata: (AudioBuffer) => void
 
-  constructor(audioContext, stream, bufferSize = 4096) {
+  constructor(
+    audioContext: AudioContext,
+    stream: MediaStream,
+    bufferSize = 4096
+  ) {
     this.ctx = audioContext
     this.stream = stream
     this.bufferSize = bufferSize
@@ -24,7 +28,7 @@ class RawMediaRecorder {
     this.buffers = []
   }
 
-  exportData(buffers) {
+  private exportData(buffers) {
     let totalLength = buffers.reduce((acc, buffer) => acc + buffer.length, 0)
     let audioBuffer = this.ctx.createBuffer(1, totalLength, this.ctx.sampleRate)
     let outChannel = audioBuffer.getChannelData(0)
