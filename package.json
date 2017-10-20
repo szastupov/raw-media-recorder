@@ -1,6 +1,6 @@
 {
   "name": "raw-media-recorder",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Record microphone audio to raw buffer",
   "author": "Stepan Zastupov <stepan.zastupov@gmail.com>",
   "repository": "https://github.com/szastupov/raw-media-recorder.git",
