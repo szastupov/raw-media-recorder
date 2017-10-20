@@ -1,3 +1,6 @@
+/**
+ * RawMediaRecorder records audio from MediaStream into raw AudioBuffer
+ */
 class RawMediaRecorder {
   readonly ctx: AudioContext
   readonly stream: MediaStream
@@ -6,8 +9,11 @@ class RawMediaRecorder {
   private buffers: Float32Array[]
   private script?: ScriptProcessorNode
 
+  /** Funciton to call when recording started */
   onstart: () => void
+  /** Funciton to call when recording stoped */
   onstop: () => void
+  /** Called when data recorded and available */
   ondata: (AudioBuffer) => void
 
   constructor(
@@ -28,20 +34,7 @@ class RawMediaRecorder {
     this.buffers = []
   }
 
-  private exportData(buffers) {
-    let totalLength = buffers.reduce((acc, buffer) => acc + buffer.length, 0)
-    let audioBuffer = this.ctx.createBuffer(1, totalLength, this.ctx.sampleRate)
-    let outChannel = audioBuffer.getChannelData(0)
-
-    let offset = 0
-    for (let buffer of buffers) {
-      outChannel.set(buffer, offset)
-      offset += buffer.length
-    }
-
-    this.ondata(audioBuffer)
-  }
-
+  /** Start recording */
   start() {
     const script = this.ctx.createScriptProcessor(this.bufferSize, 1, 1)
     this.script = script
@@ -56,6 +49,7 @@ class RawMediaRecorder {
     this.onstart()
   }
 
+  /** Stop recording */
   stop() {
     this.source.disconnect(this.script)
     this.script.disconnect(this.ctx.destination)
@@ -65,6 +59,20 @@ class RawMediaRecorder {
     this.onstop()
 
     setImmediate(() => this.exportData(buffers))
+  }
+
+  private exportData(buffers) {
+    let totalLength = buffers.reduce((acc, buffer) => acc + buffer.length, 0)
+    let audioBuffer = this.ctx.createBuffer(1, totalLength, this.ctx.sampleRate)
+    let outChannel = audioBuffer.getChannelData(0)
+
+    let offset = 0
+    for (let buffer of buffers) {
+      outChannel.set(buffer, offset)
+      offset += buffer.length
+    }
+
+    this.ondata(audioBuffer)
   }
 }
 
