@@ -29,7 +29,7 @@ navigator.mediaDevices
             // this.setState({ recording: false })
         }
         recorder.ondata = data => {
-            // Data recorder as ArrayBuffer
+            // Data recorder as AudioBuffer
         }
     })
     .catch(err => console.error(err))
