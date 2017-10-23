@@ -1,5 +1,5 @@
 /**
- * RawMediaRecorder records audio from MediaStream into raw AudioBuffer
+ * Record audio from MediaStream into raw AudioBuffer
  */
 class RawMediaRecorder {
   readonly ctx: AudioContext
