@@ -3,8 +3,8 @@
  */
 class RawMediaRecorder {
   readonly ctx: AudioContext
-  readonly stream: MediaStream
   readonly bufferSize: number
+  private stream: MediaStream
   private source: MediaStreamAudioSourceNode
   private buffers: Float32Array[]
   private script?: ScriptProcessorNode
@@ -16,16 +16,9 @@ class RawMediaRecorder {
   /** Called when data recorded and available */
   ondata: (AudioBuffer) => void
 
-  constructor(
-    audioContext: AudioContext,
-    stream: MediaStream,
-    bufferSize = 4096
-  ) {
+  constructor(audioContext: AudioContext, bufferSize = 4096) {
     this.ctx = audioContext
-    this.stream = stream
     this.bufferSize = bufferSize
-
-    this.source = audioContext.createMediaStreamSource(stream)
 
     this.onstart = () => console.log("recording started")
     this.onstop = () => console.log("recording stoped")
@@ -36,6 +29,16 @@ class RawMediaRecorder {
 
   /** Start recording */
   start() {
+    navigator.mediaDevices
+      .getUserMedia({ audio: true, video: false })
+      .then(stream => this.startStream(stream))
+      .catch(err => console.error(err))
+  }
+
+  private startStream(stream: MediaStream) {
+    this.stream = stream
+    this.source = this.ctx.createMediaStreamSource(stream)
+
     const script = this.ctx.createScriptProcessor(this.bufferSize, 1, 1)
     this.script = script
 
@@ -51,11 +54,16 @@ class RawMediaRecorder {
 
   /** Stop recording */
   stop() {
-    this.source.disconnect(this.script)
-    this.script.disconnect(this.ctx.destination)
+    this.stream.getTracks().forEach(track => track.stop())
+    this.source.disconnect()
+    this.script.disconnect()
 
     let buffers = this.buffers
+
     this.buffers = []
+    this.stream = null
+    this.source = null
+    this.script = null
     this.onstop()
 
     setImmediate(() => this.exportData(buffers))
