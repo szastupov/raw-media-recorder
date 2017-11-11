@@ -29,8 +29,11 @@ class RawMediaRecorder {
 
   /** Start recording */
   start() {
-    navigator.mediaDevices
-      .getUserMedia({ audio: true, video: false })
+    this.ctx
+      .resume()
+      .then(() =>
+        navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+      )
       .then(stream => this.startStream(stream))
       .catch(err => console.error(err))
   }
