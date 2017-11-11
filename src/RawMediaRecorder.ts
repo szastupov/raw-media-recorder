@@ -69,7 +69,7 @@ class RawMediaRecorder {
     this.script = null
     this.onstop()
 
-    setImmediate(() => this.exportData(buffers))
+    setTimeout(() => this.exportData(buffers), 100)
   }
 
   private exportData(buffers) {
