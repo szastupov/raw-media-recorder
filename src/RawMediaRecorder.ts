@@ -8,6 +8,7 @@ class RawMediaRecorder {
   private source: MediaStreamAudioSourceNode
   private buffers: Float32Array[]
   private script?: ScriptProcessorNode
+  public analyser?: AnalyserNode
 
   /** Funciton to call when recording started */
   onstart: () => void
@@ -39,19 +40,22 @@ class RawMediaRecorder {
   }
 
   private startStream(stream: MediaStream) {
-    this.stream = stream
-    this.source = this.ctx.createMediaStreamSource(stream)
-
+    const source = this.ctx.createMediaStreamSource(stream)
+    const analyser = this.ctx.createAnalyser()
     const script = this.ctx.createScriptProcessor(this.bufferSize, 1, 1)
-    this.script = script
 
     script.onaudioprocess = ev => {
       this.buffers.push(ev.inputBuffer.getChannelData(0).slice())
     }
 
-    this.source.connect(script)
+    source.connect(analyser)
+    analyser.connect(script)
     script.connect(this.ctx.destination)
 
+    this.stream = stream
+    this.source = source
+    this.analyser = analyser
+    this.script = script
     this.onstart()
   }
 
@@ -59,6 +63,7 @@ class RawMediaRecorder {
   stop() {
     this.stream.getTracks().forEach(track => track.stop())
     this.source.disconnect()
+    this.analyser.disconnect()
     this.script.disconnect()
 
     let buffers = this.buffers
@@ -66,6 +71,7 @@ class RawMediaRecorder {
     this.buffers = []
     this.stream = null
     this.source = null
+    this.analyser = null
     this.script = null
     this.onstop()
 
