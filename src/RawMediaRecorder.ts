@@ -60,7 +60,7 @@ class RawMediaRecorder {
   }
 
   /** Stop recording */
-  stop() {
+  stop(finish = true) {
     this.stream.getTracks().forEach(track => track.stop())
     this.source.disconnect()
     this.analyser.disconnect()
@@ -75,7 +75,14 @@ class RawMediaRecorder {
     this.script = null
     this.onstop()
 
-    setTimeout(() => this.exportData(buffers), 100)
+    if (finish) {
+      setTimeout(() => this.exportData(buffers), 100)
+    }
+  }
+
+  /** Cancel recording, onstop will be called but not ondata */
+  cancel() {
+    this.stop(false)
   }
 
   private exportData(buffers) {
