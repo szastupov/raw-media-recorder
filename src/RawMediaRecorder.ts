@@ -60,7 +60,7 @@ class RawMediaRecorder {
   }
 
   /** Stop recording */
-  stop(finish = true) {
+  stop(dataCallback) {
     this.stream.getTracks().forEach(track => track.stop())
     this.source.disconnect()
     this.analyser.disconnect()
@@ -75,17 +75,17 @@ class RawMediaRecorder {
     this.script = null
     this.onstop()
 
-    if (finish) {
-      setTimeout(() => this.exportData(buffers), 100)
-    }
+    setTimeout(() => this.exportData(buffers, dataCallback || this.ondata), 100)
   }
 
   /** Cancel recording, onstop will be called but not ondata */
   cancel() {
-    this.stop(false)
+    this.stop(() => {
+      /* noop */
+    })
   }
 
-  private exportData(buffers) {
+  private exportData(buffers, callback) {
     let totalLength = buffers.reduce((acc, buffer) => acc + buffer.length, 0)
     let audioBuffer = this.ctx.createBuffer(1, totalLength, this.ctx.sampleRate)
     let outChannel = audioBuffer.getChannelData(0)
@@ -96,7 +96,7 @@ class RawMediaRecorder {
       offset += buffer.length
     }
 
-    this.ondata(audioBuffer)
+    callback(audioBuffer)
   }
 }
 
